@@ -1,10 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
+import { useAuthStore } from "@/lib/store/auth-store";
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const hydrate = useAuthStore((s) => s.hydrate);
+
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
