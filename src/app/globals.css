@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-fraunces: "Fraunces", serif;
+  --font-inter: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+@layer base {
+  * {
+    @apply border-line;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-paper-50 text-ink-900 font-sans antialiased;
+  }
+  ::selection {
+    @apply bg-ink-900 text-paper-50;
+  }
+  :focus-visible {
+    outline: 2px solid #0a0a0a;
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Plaque number tag — the signature device used on every property,
+     rental request, and payment reference across the app. */
+  .plaque {
+    @apply inline-flex items-center gap-1.5 font-mono text-[11px] tracking-widest2 uppercase text-ink-500;
+  }
+
+  .hairline {
+    @apply border-t border-line;
+  }
+
+  /* Architectural hatching placeholder for properties without a photo */
+  .hatch-pattern {
+    background-image: repeating-linear-gradient(
+      45deg,
+      #d8d6cc,
+      #d8d6cc 1px,
+      transparent 1px,
+      transparent 10px
+    );
+  }
+}
