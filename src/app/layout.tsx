@@ -28,6 +28,16 @@ export const metadata: Metadata = {
   title: "RentNest — Find & List Rental Properties with Ease",
   description:
     "RentNest is a rental property marketplace. Browse listings, submit rental requests, pay securely, and manage properties — all in one ledger.",
+  openGraph: {
+    title: "RentNest — Find & List Rental Properties with Ease",
+    description: "Browse listings, submit rental requests, and pay securely — all in one ledger.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "RentNest",
+    description: "Find & list rental properties with ease.",
+  },
 };
 
 export default function RootLayout({
