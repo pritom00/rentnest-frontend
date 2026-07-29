@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +11,7 @@ import { Footer } from "@/components/layout/footer";
 import { Input, Label, FieldError } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLogin } from "@/hooks/use-auth";
+import { useAuthStore } from "@/lib/store/auth-store";
 import { handleApiError } from "@/lib/handle-error";
 import { loginSchema, LoginFormValues } from "@/lib/validations/auth";
 
@@ -24,6 +25,13 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const loginMutation = useLogin();
+  const { user, hydrated } = useAuthStore();
+
+  useEffect(() => {
+    if (hydrated && user) {
+      router.replace(dashboardPath[user.role] || "/");
+    }
+  }, [hydrated, user, router]);
 
   const {
     register,

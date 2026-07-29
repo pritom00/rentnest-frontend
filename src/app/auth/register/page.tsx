@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -11,6 +11,7 @@ import { Footer } from "@/components/layout/footer";
 import { Input, Label, FieldError } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRegister } from "@/hooks/use-auth";
+import { useAuthStore } from "@/lib/store/auth-store";
 import { handleApiError } from "@/lib/handle-error";
 import { registerSchema, RegisterFormValues } from "@/lib/validations/auth";
 import { cn } from "@/lib/utils";
@@ -20,10 +21,23 @@ const roleOptions: { value: "TENANT" | "LANDLORD"; title: string; description: s
   { value: "LANDLORD", title: "Landlord", description: "I want to list my property" },
 ];
 
+const dashboardPath: Record<string, string> = {
+  TENANT: "/dashboard/tenant",
+  LANDLORD: "/dashboard/landlord",
+  ADMIN: "/dashboard/admin",
+};
+
 export default function RegisterPage() {
   const router = useRouter();
   const registerMutation = useRegister();
   const [selectedRole, setSelectedRole] = useState<"TENANT" | "LANDLORD">("TENANT");
+  const { user, hydrated } = useAuthStore();
+
+  useEffect(() => {
+    if (hydrated && user) {
+      router.replace(dashboardPath[user.role] || "/");
+    }
+  }, [hydrated, user, router]);
 
   const {
     register,
