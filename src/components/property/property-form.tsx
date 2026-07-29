@@ -15,7 +15,7 @@ export function PropertyForm({
   isSubmitting,
 }: {
   defaultValues?: Partial<Property>;
-  onSubmit: (values: PropertyFormValues & { amenities: string[] }) => void;
+  onSubmit: (values: PropertyFormValues & { amenities: string[]; images: string[] }) => void;
   submitLabel: string;
   isSubmitting: boolean;
 }) {
@@ -46,7 +46,7 @@ export function PropertyForm({
       .split(",")
       .map((a) => a.trim())
       .filter(Boolean);
-    onSubmit({ ...values, amenities });
+    onSubmit({ ...values, amenities, images: [] });
   };
 
   return (
