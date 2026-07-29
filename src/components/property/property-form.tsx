@@ -8,6 +8,13 @@ import { useCategories } from "@/hooks/use-categories";
 import { propertySchema, PropertyFormValues } from "@/lib/validations/property";
 import { Property } from "@/lib/api/types";
 
+function parseUrls(text: string): string[] {
+  return text
+    .split("\n")
+    .map((u) => u.trim())
+    .filter(Boolean);
+}
+
 export function PropertyForm({
   defaultValues,
   onSubmit,
@@ -24,6 +31,7 @@ export function PropertyForm({
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<PropertyFormValues>({
     resolver: zodResolver(propertySchema),
@@ -38,15 +46,19 @@ export function PropertyForm({
       areaSqft: defaultValues?.areaSqft ?? undefined,
       categoryId: defaultValues?.categoryId ?? "",
       amenitiesText: defaultValues?.amenities?.join(", ") ?? "",
+      imagesText: defaultValues?.images?.join("\n") ?? "",
     },
   });
+
+  const imagePreviewUrls = parseUrls(watch("imagesText") || "");
 
   const submit = (values: PropertyFormValues) => {
     const amenities = (values.amenitiesText || "")
       .split(",")
       .map((a) => a.trim())
       .filter(Boolean);
-    onSubmit({ ...values, amenities, images: [] });
+    const images = parseUrls(values.imagesText || "");
+    onSubmit({ ...values, amenities, images });
   };
 
   return (
@@ -110,6 +122,36 @@ export function PropertyForm({
       <div>
         <Label htmlFor="amenitiesText">Amenities (comma-separated)</Label>
         <Input id="amenitiesText" placeholder="WiFi, Parking, Elevator" {...register("amenitiesText")} />
+      </div>
+
+      <div>
+        <Label htmlFor="imagesText">Image URLs (one per line)</Label>
+        <Textarea
+          id="imagesText"
+          placeholder={"https://example.com/photo-1.jpg\nhttps://example.com/photo-2.jpg"}
+          error={errors.imagesText?.message}
+          {...register("imagesText")}
+        />
+        <FieldError message={errors.imagesText?.message} />
+        <p className="mt-1.5 text-[11px] text-ink-500">
+          Paste direct links to hosted images (e.g. from Imgur, Cloudinary, or your own storage). The first URL becomes the cover photo.
+        </p>
+        {imagePreviewUrls.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {imagePreviewUrls.map((url, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={i}
+                src={url}
+                alt={`Preview ${i + 1}`}
+                className="h-16 w-16 border border-line object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.opacity = "0.3";
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <Button type="submit" variant="primary" loading={isSubmitting}>

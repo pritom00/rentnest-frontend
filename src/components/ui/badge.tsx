@@ -1,18 +1,21 @@
 import { cn } from "@/lib/utils";
 import { RentalStatus, PropertyStatus, UserStatus, PaymentStatus } from "@/lib/api/types";
 
-// Monochrome status system: the ledger stays black & white, with the
-// single "stamp red" reserved for rejection/failure/danger states —
-// like a rubber ink-stamp on a paper form. Everything else is
-// distinguished by weight and fill, not color.
+// Rental status uses the spec's suggested color coding — this is the
+// one place color is used functionally, since status at a glance
+// (pending/approved/rejected/active/completed) is the single most
+// important signal a tenant or landlord reads on this page.
 const RENTAL_STYLES: Record<RentalStatus, string> = {
-  PENDING: "border border-ink-300 text-ink-500",
-  APPROVED: "border border-ink-900 text-ink-900",
-  ACTIVE: "bg-ink-900 text-paper-50",
-  COMPLETED: "border border-line text-ink-300",
-  REJECTED: "border border-stamp text-stamp",
-  CANCELLED: "border border-stamp text-stamp",
+  PENDING: "bg-amber-100 text-amber-800 border border-amber-300",
+  APPROVED: "bg-blue-100 text-blue-800 border border-blue-300",
+  ACTIVE: "bg-emerald-100 text-emerald-800 border border-emerald-300",
+  COMPLETED: "bg-gray-100 text-gray-600 border border-gray-300",
+  REJECTED: "bg-red-100 text-red-700 border border-red-300",
+  CANCELLED: "bg-red-100 text-red-700 border border-red-300",
 };
+
+// Everywhere else keeps the black & white "ledger" system, with the
+// single "stamp red" accent reserved for errors/danger states.
 
 const PROPERTY_STYLES: Record<PropertyStatus, string> = {
   AVAILABLE: "border border-ink-900 text-ink-900",

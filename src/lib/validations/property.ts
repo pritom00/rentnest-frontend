@@ -11,5 +11,23 @@ export const propertySchema = z.object({
   areaSqft: z.coerce.number().int().positive().optional().or(z.literal(undefined)),
   categoryId: z.string().min(1, "Choose a category"),
   amenitiesText: z.string().optional(),
+  imagesText: z
+    .string()
+    .optional()
+    .refine(
+      (val) => {
+        if (!val) return true;
+        const urls = val.split("\n").map((u) => u.trim()).filter(Boolean);
+        return urls.every((u) => {
+          try {
+            new URL(u);
+            return true;
+          } catch {
+            return false;
+          }
+        });
+      },
+      { message: "Each line must be a valid image URL (starting with http:// or https://)" }
+    ),
 });
 export type PropertyFormValues = z.infer<typeof propertySchema>;

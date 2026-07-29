@@ -2,17 +2,41 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminApi } from "@/lib/api/admin";
-import { UserStatus } from "@/lib/api/types";
+import { User, UserStatus } from "@/lib/api/types";
 
 export function useAdminUsers(page = 1, limit = 20) {
   return useQuery({ queryKey: ["admin-users", page], queryFn: () => adminApi.listUsers(page, limit) });
 }
 
+/**
+ * Ban/unban with an optimistic update: the badge in the table flips
+ * instantly rather than waiting on a round trip, then rolls back if
+ * the server rejects it (e.g. trying to ban an admin).
+ */
 export function useUpdateUserStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: UserStatus }) => adminApi.updateUserStatus(id, status),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-users"] }),
+
+    onMutate: async ({ id, status }) => {
+      await qc.cancelQueries({ queryKey: ["admin-users"] });
+      const previousEntries = qc.getQueriesData<{ data: User[]; meta: unknown }>({ queryKey: ["admin-users"] });
+
+      qc.setQueriesData<{ data: User[]; meta: unknown } | undefined>({ queryKey: ["admin-users"] }, (old) => {
+        if (!old) return old;
+        return { ...old, data: old.data.map((u) => (u.id === id ? { ...u, status } : u)) };
+      });
+
+      return { previousEntries };
+    },
+
+    onError: (_err, _variables, context) => {
+      context?.previousEntries?.forEach(([key, value]) => {
+        qc.setQueryData(key, value);
+      });
+    },
+
+    onSettled: () => qc.invalidateQueries({ queryKey: ["admin-users"] }),
   });
 }
 
