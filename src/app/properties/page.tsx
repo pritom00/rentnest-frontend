@@ -19,7 +19,7 @@ export default function PropertiesPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-12 sm:px-8">
+      <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-5 py-12 sm:px-8">
         <div className="mb-10">
           <p className="plaque mb-2">Registry · All Listings</p>
           <h1 className="font-display text-4xl italic text-ink-900">Available properties</h1>

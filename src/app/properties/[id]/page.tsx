@@ -82,7 +82,7 @@ export default function PropertyDetailPage() {
     return (
       <div className="flex min-h-screen flex-col">
         <Navbar />
-        <main className="mx-auto max-w-6xl flex-1 px-5 py-16 sm:px-8">
+        <main id="main-content" className="mx-auto max-w-6xl flex-1 px-5 py-16 sm:px-8">
           <p className="text-ink-500">Loading listing…</p>
         </main>
         <Footer />

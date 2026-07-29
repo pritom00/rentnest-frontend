@@ -16,7 +16,7 @@ export default function HomePage() {
     <div className="flex min-h-screen flex-col">
       <Navbar />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <section className="border-b border-ink-900">
           <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-5 py-20 sm:px-8 md:grid-cols-[1.2fr_0.8fr] md:py-28">
             <div>

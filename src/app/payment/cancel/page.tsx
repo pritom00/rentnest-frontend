@@ -10,7 +10,7 @@ export default function PaymentCancelPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-5 py-20 text-center sm:px-8">
+      <main id="main-content" className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-5 py-20 text-center sm:px-8">
         <CircleSlash2 className="mb-5 h-10 w-10 text-ink-500" strokeWidth={1.5} />
         <p className="plaque mb-2">Payment Cancelled</p>
         <h1 className="mb-3 font-display text-3xl italic text-ink-900">No charge was made</h1>

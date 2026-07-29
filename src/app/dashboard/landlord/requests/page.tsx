@@ -38,7 +38,7 @@ export default function LandlordRequestsPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-12 sm:px-8">
+      <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-5 py-12 sm:px-8">
         <p className="plaque mb-2">Requests · Incoming</p>
         <h1 className="mb-10 font-display text-4xl italic text-ink-900">Rental requests</h1>
 

@@ -15,7 +15,7 @@ export default function NewPropertyPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-12 sm:px-8">
+      <main id="main-content" className="mx-auto w-full max-w-2xl flex-1 px-5 py-12 sm:px-8">
         <p className="plaque mb-2">New Entry</p>
         <h1 className="mb-8 font-display text-3xl italic text-ink-900">Create a listing</h1>
 

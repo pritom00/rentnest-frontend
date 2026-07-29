@@ -38,7 +38,7 @@ export default function LandlordDashboardPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-12 sm:px-8">
+      <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-5 py-12 sm:px-8">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="plaque mb-2">Landlord Ledger</p>
