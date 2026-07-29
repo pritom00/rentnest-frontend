@@ -18,7 +18,7 @@ All requests go through a single typed client — `src/lib/api/client.ts` — wh
 |---|---|---|
 | `/auth/register` | `app/auth/register/page.tsx` | `POST /api/auth/register` |
 | `/auth/login` | `app/auth/login/page.tsx` | `POST /api/auth/login` |
-| (all authenticated pages) | `useAuthStore` / `Navbar` | `GET /api/auth/me` (implicitly trusted via stored JWT; re-validated by every subsequent authenticated call) |
+| (all authenticated pages) | `useAuthStore` / `Navbar` / `SessionGuard` | `GET /api/auth/me` — re-validated silently on every app load; clears the local session immediately if the token is expired or the account was banned, rather than waiting for some other request to fail |
 
 ## Tenant
 
@@ -27,6 +27,7 @@ All requests go through a single typed client — `src/lib/api/client.ts` — wh
 | `/properties/[id]` (request form) | `RentalRequestForm` section of property detail page | `POST /api/rentals` |
 | `/dashboard/tenant` | `app/dashboard/tenant/page.tsx` | `GET /api/rentals`, `GET /api/payments` |
 | `/dashboard/tenant/requests/[id]/pay` | Pay page | `GET /api/rentals/:id`, `POST /api/payments/create` (redirects to Stripe Checkout) |
+| `/dashboard/tenant/payments/[id]` | Payment detail page | `GET /api/payments/:id` |
 | `/payment/success` | Success page | `POST /api/payments/confirm` (using the `session_id` query param Stripe appends on redirect) |
 | `/payment/cancel` | Cancel page | — (no API call; informs the user the request is still `APPROVED` and can be paid later) |
 | `/properties/[id]` (review form) | Review form section, shown only when a completed rental exists | `POST /api/reviews` |
@@ -47,7 +48,7 @@ All requests go through a single typed client — `src/lib/api/client.ts` — wh
 | `/dashboard/admin` (Users tab) | `UsersTab` | `GET /api/admin/users`, `PATCH /api/admin/users/:id` |
 | `/dashboard/admin` (Properties tab) | `PropertiesTab` | `GET /api/admin/properties` |
 | `/dashboard/admin` (Rentals tab) | `RentalsTab` | `GET /api/admin/rentals` |
-| `/dashboard/admin` (Categories tab) | `CategoriesTab` | `GET /api/categories`, `POST /api/admin/categories`, `DELETE /api/admin/categories/:id` |
+| `/dashboard/admin` (Categories tab) | `CategoriesTab`, `CategoryEditRow` | `GET /api/categories`, `POST /api/admin/categories`, `PUT /api/admin/categories/:id`, `DELETE /api/admin/categories/:id` |
 
 ## Cross-cutting concerns
 
