@@ -14,10 +14,13 @@ import { Button } from "@/components/ui/button";
 import { Input, Textarea, Label, FieldError } from "@/components/ui/input";
 import { useProperty } from "@/hooks/use-properties";
 import { useCreateRental } from "@/hooks/use-rentals";
+import { useMyRentals } from "@/hooks/use-rentals";
+import { useCreateReview } from "@/hooks/use-reviews";
 import { useAuthStore } from "@/lib/store/auth-store";
 import { formatCurrency, formatDate, shortRef } from "@/lib/utils";
 import { handleApiError } from "@/lib/handle-error";
 import { rentalRequestSchema, RentalRequestFormValues } from "@/lib/validations/rental";
+import { reviewSchema, ReviewFormValues } from "@/lib/validations/review";
 import Link from "next/link";
 
 export default function PropertyDetailPage() {
@@ -27,6 +30,8 @@ export default function PropertyDetailPage() {
   const { user, hydrated } = useAuthStore();
   const [showRequestForm, setShowRequestForm] = useState(false);
   const createRental = useCreateRental();
+  const createReview = useCreateReview();
+  const { data: myRentals } = useMyRentals();
 
   const {
     register,
@@ -34,6 +39,14 @@ export default function PropertyDetailPage() {
     setError,
     formState: { errors },
   } = useForm<RentalRequestFormValues>({ resolver: zodResolver(rentalRequestSchema) });
+
+  const {
+    register: registerReview,
+    handleSubmit: handleReviewSubmit,
+    setError: setReviewError,
+    reset: resetReviewForm,
+    formState: { errors: reviewErrors },
+  } = useForm<ReviewFormValues>({ resolver: zodResolver(reviewSchema) });
 
   const onSubmit = (values: RentalRequestFormValues) => {
     if (!property) return;
@@ -47,6 +60,20 @@ export default function PropertyDetailPage() {
           router.push("/dashboard/tenant");
         },
         onError: (err) => handleApiError(err, setError),
+      }
+    );
+  };
+
+  const onSubmitReview = (values: ReviewFormValues) => {
+    if (!property) return;
+    createReview.mutate(
+      { propertyId: property.id, rating: values.rating, comment: values.comment || undefined },
+      {
+        onSuccess: () => {
+          toast.success("Review submitted — thanks for sharing your experience");
+          resetReviewForm();
+        },
+        onError: (err) => handleApiError(err, setReviewError),
       }
     );
   };
@@ -167,6 +194,46 @@ export default function PropertyDetailPage() {
                   ))}
                 </div>
               )}
+
+              {user?.role === "TENANT" && (() => {
+                const hasCompletedRental = myRentals?.some(
+                  (r) => r.propertyId === property.id && r.status === "COMPLETED"
+                );
+                const alreadyReviewed = property.reviews?.some((r) => r.tenant?.id === user.id);
+
+                if (alreadyReviewed) return null;
+
+                if (!hasCompletedRental) return null;
+
+                return (
+                  <form onSubmit={handleReviewSubmit(onSubmitReview)} className="mt-6 border-t border-line pt-6">
+                    <p className="plaque mb-3">Leave a review</p>
+                    <div className="mb-3">
+                      <Label htmlFor="rating" required>Rating</Label>
+                      <select
+                        id="rating"
+                        className="w-full border border-line bg-paper-50 px-3.5 py-2.5 text-[14px] text-ink-900 focus:outline-none focus:ring-1 focus:ring-ink-900"
+                        {...registerReview("rating")}
+                        defaultValue=""
+                      >
+                        <option value="" disabled>Choose a rating</option>
+                        {[5, 4, 3, 2, 1].map((n) => (
+                          <option key={n} value={n}>{n} star{n > 1 ? "s" : ""}</option>
+                        ))}
+                      </select>
+                      <FieldError message={reviewErrors.rating?.message} />
+                    </div>
+                    <div className="mb-4">
+                      <Label htmlFor="comment">Comment</Label>
+                      <Textarea id="comment" placeholder="How was your stay?" {...registerReview("comment")} />
+                      <FieldError message={reviewErrors.comment?.message} />
+                    </div>
+                    <Button type="submit" variant="primary" size="sm" loading={createReview.isPending}>
+                      Submit review
+                    </Button>
+                  </form>
+                );
+              })()}
             </div>
           </div>
 
