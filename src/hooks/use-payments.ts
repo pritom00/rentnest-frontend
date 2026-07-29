@@ -18,3 +18,7 @@ export function useConfirmPayment() {
 export function useMyPayments() {
   return useQuery({ queryKey: ["my-payments"], queryFn: paymentsApi.mine });
 }
+
+export function usePayment(id: string) {
+  return useQuery({ queryKey: ["payment", id], queryFn: () => paymentsApi.getById(id), enabled: !!id });
+}

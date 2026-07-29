@@ -22,6 +22,7 @@ import {
   useAdminProperties,
   useAdminRentals,
   useCreateCategory,
+  useUpdateCategory,
   useDeleteCategory,
 } from "@/hooks/use-admin";
 import { useCategories } from "@/hooks/use-categories";
@@ -250,7 +251,9 @@ function RentalsTab() {
 function CategoriesTab() {
   const { data: categories, isLoading } = useCategories();
   const createCategory = useCreateCategory();
+  const updateCategory = useUpdateCategory();
   const deleteCategory = useDeleteCategory();
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const {
     register,
@@ -303,17 +306,45 @@ function CategoriesTab() {
                 </tr>
               </thead>
               <tbody>
-                {categories.map((c) => (
-                  <tr key={c.id} className="border-b border-line last:border-0 hover:bg-paper-100">
-                    <td className="px-4 py-4 text-ink-900">{c.name}</td>
-                    <td className="px-4 py-4 text-ink-500">{c.description}</td>
-                    <td className="px-4 py-4 text-right">
-                      <Button size="sm" variant="stamp" onClick={() => remove(c.id, c.name)} loading={deleteCategory.isPending}>
-                        Delete
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
+                {categories.map((c) =>
+                  editingId === c.id ? (
+                    <CategoryEditRow
+                      key={c.id}
+                      id={c.id}
+                      defaultName={c.name}
+                      defaultDescription={c.description ?? ""}
+                      isSubmitting={updateCategory.isPending}
+                      onCancel={() => setEditingId(null)}
+                      onSave={(payload) =>
+                        updateCategory.mutate(
+                          { id: c.id, payload },
+                          {
+                            onSuccess: () => {
+                              toast.success("Category updated");
+                              setEditingId(null);
+                            },
+                            onError: (err) => handleApiError(err),
+                          }
+                        )
+                      }
+                    />
+                  ) : (
+                    <tr key={c.id} className="border-b border-line last:border-0 hover:bg-paper-100">
+                      <td className="px-4 py-4 text-ink-900">{c.name}</td>
+                      <td className="px-4 py-4 text-ink-500">{c.description}</td>
+                      <td className="px-4 py-4 text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button size="sm" variant="outline" onClick={() => setEditingId(c.id)}>
+                            Edit
+                          </Button>
+                          <Button size="sm" variant="stamp" onClick={() => remove(c.id, c.name)} loading={deleteCategory.isPending}>
+                            Delete
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                )}
               </tbody>
             </table>
           </div>
@@ -342,5 +373,60 @@ function CategoriesTab() {
         </Button>
       </form>
     </div>
+  );
+}
+
+function CategoryEditRow({
+  id,
+  defaultName,
+  defaultDescription,
+  isSubmitting,
+  onSave,
+  onCancel,
+}: {
+  id: string;
+  defaultName: string;
+  defaultDescription: string;
+  isSubmitting: boolean;
+  onSave: (payload: { name: string; description?: string }) => void;
+  onCancel: () => void;
+}) {
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<CategoryFormValues>({
+    resolver: zodResolver(categorySchema),
+    defaultValues: { name: defaultName, description: defaultDescription },
+  });
+
+  const submit = (values: CategoryFormValues) => {
+    onSave({ name: values.name.trim(), description: values.description?.trim() || undefined });
+  };
+
+  return (
+    <tr className="border-b border-line bg-paper-100 last:border-0">
+      <td className="px-4 py-3" colSpan={3}>
+        <form onSubmit={handleSubmit(submit)} className="flex flex-wrap items-start gap-3">
+          <div className="min-w-[160px] flex-1">
+            <Input placeholder="Name" error={errors.name?.message} {...register("name")} />
+            <FieldError message={errors.name?.message} />
+          </div>
+          <div className="min-w-[220px] flex-[2]">
+            <Input placeholder="Description" error={errors.description?.message} {...register("description")} />
+            <FieldError message={errors.description?.message} />
+          </div>
+          <div className="flex gap-2">
+            <Button type="submit" size="sm" variant="primary" loading={isSubmitting}>
+              Save
+            </Button>
+            <Button type="button" size="sm" variant="ghost" onClick={onCancel}>
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </td>
+    </tr>
   );
 }

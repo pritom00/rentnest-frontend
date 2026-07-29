@@ -135,7 +135,11 @@ export default function TenantDashboardPage() {
                 <tbody>
                   {payments.map((p) => (
                     <tr key={p.id} className="border-b border-line last:border-0 hover:bg-paper-100">
-                      <td className="px-4 py-4 font-mono text-[12px] text-ink-700">{p.transactionId}</td>
+                      <td className="px-4 py-4 font-mono text-[12px] text-ink-700">
+                        <Link href={`/dashboard/tenant/payments/${p.id}`} className="hover:underline">
+                          {p.transactionId}
+                        </Link>
+                      </td>
                       <td className="px-4 py-4 font-mono">{formatCurrency(p.amount)}</td>
                       <td className="px-4 py-4"><PaymentStatusBadge status={p.status} /></td>
                       <td className="px-4 py-4 text-ink-700">
