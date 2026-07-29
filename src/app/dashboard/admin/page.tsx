@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Users, Building2, ClipboardList, Tag } from "lucide-react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
-import { Input, Textarea, Label } from "@/components/ui/input";
+import { Input, Textarea, Label, FieldError } from "@/components/ui/input";
 import { UserStatusBadge, PropertyStatusBadge, RentalStatusBadge } from "@/components/ui/badge";
 import { TableRowSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -24,6 +26,7 @@ import {
 } from "@/hooks/use-admin";
 import { useCategories } from "@/hooks/use-categories";
 import { Pagination } from "@/lib/api/properties";
+import { categorySchema, CategoryFormValues } from "@/lib/validations/category";
 
 type Tab = "users" | "properties" | "rentals" | "categories";
 
@@ -248,24 +251,24 @@ function CategoriesTab() {
   const { data: categories, isLoading } = useCategories();
   const createCategory = useCreateCategory();
   const deleteCategory = useDeleteCategory();
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) {
-      toast.error("Category name is required");
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    setError,
+    reset,
+    formState: { errors },
+  } = useForm<CategoryFormValues>({ resolver: zodResolver(categorySchema) });
+
+  const submit = (values: CategoryFormValues) => {
     createCategory.mutate(
-      { name: name.trim(), description: description.trim() || undefined },
+      { name: values.name.trim(), description: values.description?.trim() || undefined },
       {
         onSuccess: () => {
           toast.success("Category created");
-          setName("");
-          setDescription("");
+          reset();
         },
-        onError: (err) => handleApiError(err),
+        onError: (err) => handleApiError(err, setError),
       }
     );
   };
@@ -317,20 +320,22 @@ function CategoriesTab() {
         )}
       </div>
 
-      <form onSubmit={submit} className="h-fit border border-ink-900 p-5">
+      <form onSubmit={handleSubmit(submit)} className="h-fit border border-ink-900 p-5">
         <p className="plaque mb-4">New Category</p>
         <div className="mb-4">
           <Label htmlFor="cat-name" required>Name</Label>
-          <Input id="cat-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Penthouse" />
+          <Input id="cat-name" placeholder="e.g. Penthouse" error={errors.name?.message} {...register("name")} />
+          <FieldError message={errors.name?.message} />
         </div>
         <div className="mb-4">
           <Label htmlFor="cat-desc">Description</Label>
           <Textarea
             id="cat-desc"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
             placeholder="Optional description"
+            error={errors.description?.message}
+            {...register("description")}
           />
+          <FieldError message={errors.description?.message} />
         </div>
         <Button type="submit" variant="primary" className="w-full" loading={createCategory.isPending}>
           Add category
